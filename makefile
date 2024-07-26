@@ -1,14 +1,37 @@
+# Compiler settings
+CC := g++
+CFLAGS := -std=c++14 -Wall -Wextra -O3
+LDFLAGS :=
 
+# Directories
+SRCDIR := src
+INCDIR := headers
+BUILDDIR := build
+BINDIR := bin
 
-all: atm
+# --------------------------------------
+DIRNAME := $(shell basename "$(PWD)")
+# --------------------------------------
 
-atm: main.o header.o
-	g++ main.o header.o -o atm
+# Files
+SRCS := $(wildcard $(SRCDIR)/*.cpp)
+OBJS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SRCS:.cpp=.o))
+TARGET := $(BINDIR)/$(DIRNAME)
 
-main.o: main.cpp
-	g++ -c main.cpp -o main.o
+# Targets
+all: $(TARGET)
+	./exec.sh
 
-header.o: header.cpp
-	g++ -c header.cpp -o header.o
+$(TARGET): $(OBJS)
+	@mkdir -p $(BINDIR)
+	$(CC) $(LDFLAGS) $^ -o $@
 
+$(BUILDDIR)/%.o: $(SRCDIR)/%.cpp $(wildcard $(INCDIR)/*.h)
+	@mkdir -p $(BUILDDIR)
+	$(CC) $(CFLAGS) -I $(INCDIR) -c $< -o $@
+
+clean:
+	$(RM) -r $(BUILDDIR) $(BINDIR)
+
+.PHONY: all clean
 
